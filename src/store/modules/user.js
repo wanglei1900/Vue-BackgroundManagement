@@ -29,9 +29,22 @@ const mutations = {
 
 const actions = {
   // user login
-  login({ commit }, userInfo) {
+  async login({ commit }, userInfo) {
+    // 解构用户名和密码
     const { username, password } = userInfo
-    return new Promise((resolve, reject) => {
+    // ES6写法
+    let result =  await login({ username: username.trim(), password: password })
+    console.log(result);
+    // 注意：当前登录请求现在使用mock数据，mock数据code是20000
+    if (result.code ==20000) {
+      commit('SET_TOKEN', result.data.token)
+      setToken(result.data.token)
+      return 'ok'
+    }else{
+      return Promise.reject(new Error('faile'))
+    }
+    // 古老写法
+    /* return new Promise((resolve, reject) => {
       login({ username: username.trim(), password: password }).then(response => {
         const { data } = response
         commit('SET_TOKEN', data.token)
@@ -40,11 +53,12 @@ const actions = {
       }).catch(error => {
         reject(error)
       })
-    })
+    }) */
   },
 
   // get user info
-  getInfo({ commit, state }) {
+  async getInfo({ commit, state }) {
+
     return new Promise((resolve, reject) => {
       getInfo(state.token).then(response => {
         const { data } = response
