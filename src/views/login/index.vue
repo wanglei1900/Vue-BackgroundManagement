@@ -3,7 +3,7 @@
     <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" auto-complete="on" label-position="left">
 
       <div class="title-container">
-        <h3 class="title">Login Form</h3>
+        <h3 class="title">后台管理</h3>
       </div>
 
       <el-form-item prop="username">
@@ -141,6 +141,9 @@ $cursor: #fff;
 
 /* reset element-ui css */
 .login-container {
+  background: url(~@/assets/img0.jpg);
+  background-size: 100% 100%;
+
   .el-input {
     display: inline-block;
     height: 47px;
