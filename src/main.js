@@ -46,7 +46,6 @@ new Vue({
   store,
   beforeCreate() {
     // 给vue原型绑定$API方法
-    console.log(API);
     Vue.prototype.$API = API
   },
   render: h => h(App)
