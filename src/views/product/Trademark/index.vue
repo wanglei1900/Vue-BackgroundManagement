@@ -57,11 +57,12 @@
 
       <el-table-column prop="prop" label="操作" width="width" align="center">
         <template slot-scope="{ row, $index }">
+          <!-- 这里点击事件传的row -->
           <el-button
             type="warning"
             icon="el-icon-edit"
             size="mini"
-            @click="updateTradeMark"
+            @click="updateTradeMark(row)"
             >修改</el-button
           >
           <el-button type="danger" icon="el-icon-delete" size="mini"
@@ -100,14 +101,16 @@
     <!-- 
       对话框
       :visible.sync=  控制对话框显示与隐藏用的
+      Form 组件提供了表单验证的功能，只需要通过 rules 属性传入约定的验证规则，并将 Form-Item 的 prop 属性设置为需校验的字段名即可
        -->
-    <el-dialog title="添加品牌" :visible.sync="dialogFormVisible">
+       <!-- title如果代tmform.id则肯定为修改品牌 -->
+    <el-dialog :title="tmForm.id?'修改品牌':'添加品牌'" :visible.sync="dialogFormVisible">
       <!-- form表单 :model属性，这个属性的作用是，把表单的数据收集到哪个对象中，将来elementUI需要表单验证，也需要这个属性 -->
-      <el-form style="width: 80%" :model="tmForm">
-        <el-form-item label="品牌名称" label-width="100px">
+      <el-form style="width: 80%" :model="tmForm" :rules="rules" ref="ruleForm">
+        <el-form-item label="品牌名称" label-width="100px" prop="tmName">
           <el-input v-model="tmForm.tmName" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="品牌LOGO" label-width="100px">
+        <el-form-item label="品牌LOGO" label-width="100px" prop="logoUrl">
           <!-- elementUI 的upload上传组件
            -->
            <!-- 这里收集数据不能使用v-model，因为不是表单元素
@@ -142,6 +145,15 @@
 export default {
   name: "Trademark",
   data() {
+    // elementUi自定义校验规则
+    var validateTmName = (rule, value, callback) => {
+      // 自定义校验规则
+      if (value.length <2|| value.length>10) {
+        callback(new Error('品牌名称2-10位'))
+      }else{
+        callback()
+      }
+    };
     return {
       // 当前页码
       page: 1,
@@ -157,6 +169,23 @@ export default {
       tmForm:{
         tmName:"",
         logoUrl:""
+      },
+      // 表单验证规则
+      rules:{
+        // 品牌名称的验证规则
+        // required:必须要校验的字段（前面的五角星有关系）。message提示的信息，trigger用户行为的设置（事件的设置）
+        tmName: [
+          { required: true, message: '请输入品牌名称', trigger: 'blur' },
+          // 品牌名称长度2-10
+          // { min: 2, max: 10, message: '长度在 2 到 10 个字符', trigger: 'change' }
+
+          // 自定义校验规则
+          { validator: validateTmName, trigger: 'change' }
+        ],
+        // 品牌的logo验证规则
+        logoUrl: [
+          { required: true, message: '请选中品牌图片'}
+        ],
       }
     }
   },
@@ -194,11 +223,17 @@ export default {
       // 清除数数据，以防取消再次打开后还是上一次的数据
       this.tmForm = {tmName:'',logoUrl:''}
     },
-    // 修改某一个品牌
-    updateTradeMark() {
+    // 某一个品牌
+    updateTradeMark(row) {
       this.dialogFormVisible = true;
+      // row为当前选中这个品牌的信息
+      // 将已有的品牌的信息赋值给tmform展示
+      // 将服务器返回的品牌的信息，直接赋值给tmForm进行展示
+      // 也就是说tmForm存储的即为服务器返回品牌信息
+      // 使用浅拷贝
+      this.tmForm = {...row}
       // 清除数数据，以防取消再次打开后还是上一次的数据
-      this.tmForm = {tmName:'',logoUrl:''}
+      // this.tmForm = {tmName:'',logoUrl:''}
     },
     // 图片上传成功
     handleAvatarSuccess(res, file) {
@@ -222,17 +257,31 @@ export default {
       return isJPG && isLt2M;
     },
     // 添加按钮（添加品牌和修改品牌）
-    async addOrUpdateTradeMark(){
-      this.dialogFormVisible = false;
-      // 发请求（可能是添加|修改品牌）
-      let result = await this.$API.trademark.reqAddOrUpdateTradeMark(this.tmForm)
-      if (result.code ==200) {
-        // 弹出一个信息，添加品牌成功，修改品牌成功
-        this.$message(this.tmForm.id?'修改品牌成功':"添加品牌成功")
-        // 添加或者修改品牌成功之后，需要再次发请求获取列表
-        this.getPageList()
-      }
-
+     addOrUpdateTradeMark(){
+      // 当全部的验证字段通过，再去书写业务逻辑
+      
+     this.$refs.ruleForm.validate(async(success)=>{
+        // 如果全部字段符合条件
+        if (success) {
+          this.dialogFormVisible = false;
+          // 发请求（可能是添加|修改品牌）
+          let result = await this.$API.trademark.reqAddOrUpdateTradeMark(this.tmForm)
+          if (result.code ==200) {
+            // 弹出一个信息，添加品牌成功，修改品牌成功
+            // this.$message(this.tmForm.id?'修改品牌成功':"添加品牌成功")
+            this.$message({
+              message:this.tmForm.id?'修改品牌成功':'添加品牌成功',
+              type: 'success'
+            });
+            // 添加或者修改品牌成功之后，需要再次发请求获取列表
+            // 添加品牌停留在第一页，修改品牌应该留在当前页面
+            this.getPageList(this.tmForm.id?this.page:1)
+          }
+        }else{
+          console.log('提交错误')
+          return false
+        }
+     })
     }
   },
 };
