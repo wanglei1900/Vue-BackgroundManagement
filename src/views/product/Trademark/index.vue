@@ -65,7 +65,7 @@
             @click="updateTradeMark(row)"
             >修改</el-button
           >
-          <el-button type="danger" icon="el-icon-delete" size="mini"
+          <el-button type="danger" icon="el-icon-delete" size="mini" @click="deleteTradeMark(row)"
             >删除</el-button
           >
         </template>
@@ -103,7 +103,7 @@
       :visible.sync=  控制对话框显示与隐藏用的
       Form 组件提供了表单验证的功能，只需要通过 rules 属性传入约定的验证规则，并将 Form-Item 的 prop 属性设置为需校验的字段名即可
        -->
-       <!-- title如果代tmform.id则肯定为修改品牌 -->
+       <!-- 业务逻辑：title如果代tmform.id则肯定为修改品牌 -->
     <el-dialog :title="tmForm.id?'修改品牌':'添加品牌'" :visible.sync="dialogFormVisible">
       <!-- form表单 :model属性，这个属性的作用是，把表单的数据收集到哪个对象中，将来elementUI需要表单验证，也需要这个属性 -->
       <el-form style="width: 80%" :model="tmForm" :rules="rules" ref="ruleForm">
@@ -111,14 +111,12 @@
           <el-input v-model="tmForm.tmName" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="品牌LOGO" label-width="100px" prop="logoUrl">
-          <!-- elementUI 的upload上传组件
-           -->
-           <!-- 这里收集数据不能使用v-model，因为不是表单元素
+          <!-- elementUI 的upload上传组件-->
+          <!-- 这里收集数据不能使用v-model，因为不是表单元素
                 action：设置图片上传的地址
                 :on-success="handleAvatarSuccess"     图片上传成功的回调
                 :before-upload="beforeAvatarUpload"   图片上传之前的回调
-           
-            -->
+          -->
           <el-upload
             class="avatar-uploader"
             action="/dev-api/admin/product/fileUpload"
@@ -176,10 +174,9 @@ export default {
         // required:必须要校验的字段（前面的五角星有关系）。message提示的信息，trigger用户行为的设置（事件的设置）
         tmName: [
           { required: true, message: '请输入品牌名称', trigger: 'blur' },
-          // 品牌名称长度2-10
+          // 品牌名称长度2-10（官网自带的验证规则）
           // { min: 2, max: 10, message: '长度在 2 到 10 个字符', trigger: 'change' }
-
-          // 自定义校验规则
+          // 以下为自定义校验规则
           { validator: validateTmName, trigger: 'change' }
         ],
         // 品牌的logo验证规则
@@ -223,23 +220,21 @@ export default {
       // 清除数数据，以防取消再次打开后还是上一次的数据
       this.tmForm = {tmName:'',logoUrl:''}
     },
-    // 某一个品牌
+    // 修改更新某一个品牌
     updateTradeMark(row) {
+      // 对话弹窗显示
       this.dialogFormVisible = true;
-      // row为当前选中这个品牌的信息
-      // 将已有的品牌的信息赋值给tmform展示
-      // 将服务器返回的品牌的信息，直接赋值给tmForm进行展示
-      // 也就是说tmForm存储的即为服务器返回品牌信息
-      // 使用浅拷贝
+      // 作用域插槽的row参数，为当前选中这个品牌的列信息
+      // 将已有的品牌的信息赋值给tmform展示，将服务器返回的品牌的信息，直接赋值给tmForm进行展示
+      // this.tmForm = row     为什么不能这么做，直接赋值不算拷贝成功，会将v-model的数据流向页面，未确认即篡改页面数据
+      // 也就是说tmForm存储的即为服务器返回品牌信息，需要使用浅拷贝，这样才不会影响原数组
       this.tmForm = {...row}
-      // 清除数数据，以防取消再次打开后还是上一次的数据
-      // this.tmForm = {tmName:'',logoUrl:''}
     },
     // 图片上传成功
     handleAvatarSuccess(res, file) {
       // 参数res上传成功之后返回给前端的数据
+      // console.log(res);
       // 参数file上传成功之后返回给前端的数据
-
       // 收集品牌图片的数据，因为将来需要带给服务器
       this.tmForm.logoUrl = res.data
     },
@@ -257,10 +252,9 @@ export default {
       return isJPG && isLt2M;
     },
     // 添加按钮（添加品牌和修改品牌）
-     addOrUpdateTradeMark(){
+    addOrUpdateTradeMark(){
       // 当全部的验证字段通过，再去书写业务逻辑
-      
-     this.$refs.ruleForm.validate(async(success)=>{
+      this.$refs.ruleForm.validate(async(success)=>{
         // 如果全部字段符合条件
         if (success) {
           this.dialogFormVisible = false;
@@ -281,7 +275,37 @@ export default {
           console.log('提交错误')
           return false
         }
-     })
+      })
+    },
+    // 删除按钮（删除当前品牌信息）
+    deleteTradeMark(row){
+      // 弹窗
+      this.$confirm(`此操作将删除${row.tmName}`, '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async() => {
+        // 当用户点击确定按钮会触发
+        // 点击确认按钮向服务器发送删除请求，并携带ID参数
+          let result = await this.$API.trademark.reqDeleteTradeMark(row.id)
+          // 如果删除成功
+          if (result.code ==200) {
+            this.$message({
+              type: 'success',
+              message: '删除成功!'
+            });
+            // 删除后需更新，再次获取品牌里列表数据
+            // 删除后更新列表跳转 需判断当前展示数据长度是否需要跳转前一页
+            this.getPageList(this.list.length>1?this.page:this.page-1)
+          }else{
+          }
+      }).catch(() => {
+        // 当用户点击取消按钮会触发
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        });          
+      });
     }
   },
 };
