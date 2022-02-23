@@ -39,6 +39,10 @@ Vue.config.productionTip = false
 
 // 引入API接口管理的工具
 import API from '@/api'
+// 引入全局组件顶部菜单栏
+import CategorySelect from '@/components/CategorySelect'
+// 注册全局组件
+Vue.component(CategorySelect.name,CategorySelect)
 
 new Vue({
   el: '#app',

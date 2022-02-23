@@ -1,6 +1,11 @@
 <template>
   <div>
-      Attr
+      <el-card style="margin:20px 0">
+        <CategorySelect/>
+      </el-card>
+      <el-card>
+        <CategorySelect/>
+      </el-card>
   </div>
 </template>
 
