@@ -16,3 +16,8 @@ export const reqCategory3List = (category2Id)=> request({
     url:`/admin/product/getCategory3/${category2Id}`,
     method:'GET'
 })
+// 获取平台属性的数据  GET /admin/product/attrInfoList/{category1Id}/{category2Id}/{category3Id}
+export const reqAttrInfoList =(category1Id,category2Id,category3Id)=>request({
+    url:`/admin/product/attrInfoList/${category1Id}/${category2Id}/${category3Id}`,
+    method:'GET'
+})
