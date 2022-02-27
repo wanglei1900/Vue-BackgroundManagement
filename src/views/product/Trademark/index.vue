@@ -4,7 +4,7 @@
     <el-button
       type="primary"
       icon="el-icon-plus"
-      style="margin=10px 0"
+      style="margin:20px 0px"
       @click="showDialog"
       >添加</el-button
     >

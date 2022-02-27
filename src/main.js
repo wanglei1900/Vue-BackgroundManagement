@@ -41,8 +41,11 @@ Vue.config.productionTip = false
 import API from '@/api'
 // 引入全局组件顶部菜单栏
 import CategorySelect from '@/components/CategorySelect'
+// 引入全局组件HintButton
+import HintButton from '@/components/HintButton'
 // 注册全局组件
 Vue.component(CategorySelect.name,CategorySelect)
+Vue.component(HintButton.name,HintButton)
 
 new Vue({
   el: '#app',

@@ -21,3 +21,31 @@ export const reqAttrInfoList =(category1Id,category2Id,category3Id)=>request({
     url:`/admin/product/attrInfoList/${category1Id}/${category2Id}/${category3Id}`,
     method:'GET'
 })
+
+// 添加属性与属性值的接口     POST /admin/product/saveAttrInfo
+export const reqSaveOrUpdateAttrInfo =(data)=>request({
+    url:'/admin/product/saveAttrInfo',
+    method:'POST',
+    data
+})
+/* 
+{
+  "attrName": "string",   属性名
+  "attrValueList": [      属性名称中的属性值，因为属性值可以是多个，因此需要的是数组
+    {
+      "attrId": 0,        属性的id
+      "valueName": "string"   属性值
+    }
+  ],
+  "categoryId": 0,         category3Id
+  "categoryLevel": 3,      3级ID
+}
+*/
+
+// 删除属性对应的属性值，   DELETE /admin/product/deleteAttr/{attrId}
+export const reqDeleteAttr = (attrId)=> request({
+  url:`/admin/product/deleteAttr/${attrId}`,
+  method:'DELETE'
+})
+
+
