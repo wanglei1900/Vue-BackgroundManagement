@@ -1,5 +1,5 @@
 <template>
-    <a :title="title" style="margin:10px 0">
+    <a :title="title" style="margin:3px">
         <el-button v-bind="$attrs" v-on="$listeners"></el-button>
     </a>
 </template>

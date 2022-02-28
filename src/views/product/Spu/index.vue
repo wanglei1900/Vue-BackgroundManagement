@@ -4,11 +4,12 @@
       <!-- 直接引用三级联动组件CategorySelect -->
       <CategorySelect @getCategoryId="getCategoryId" :show="!show" />
     </el-card>
+    <!-- 展示spu列表  共三个模块 -->
     <el-card>
       <!-- 底部有三部分切换 -->
-      <div>
+      <div v-show="scene==0">
         <!-- 展示spu列表的 -->
-        <el-button type="primary" icon="el-icon-plus">添加Spu</el-button>
+        <el-button type="primary" icon="el-icon-plus" :disabled="!category3Id" @click="addSpu">添加Spu</el-button>
         <el-table style="width: 100%" border :data="records">
           <el-table-column type="index" label="序号" width="80px" align="center">
           </el-table-column>
@@ -20,14 +21,13 @@
             <template slot-scope="{row,$index}">
               <!-- 用封装的hintButton 替换 -->
               <hint-button type="success" icon="el-icon-plus" size="mini" title="添加spu"></hint-button>
-              <hint-button type="warning" icon="el-icon-edit" size="mini" title="修改spu"></hint-button>
+              <hint-button type="warning" icon="el-icon-edit" size="mini" title="修改spu" @click="updateSpu(row)"></hint-button>
               <hint-button type="info" icon="el-icon-info" size="mini" title="查看当前spu全部sku列表"></hint-button>
               <hint-button type="danger" icon="el-icon-delete" size="mini" title="删除spu"></hint-button>
             </template>
           </el-table-column>
         </el-table>
-          <!-- 
-            分页器
+          <!-- 分页器
             @size-change="handleSizeChange"     size-change	pageSize 改变时会触发	每页条数
             @current-change="handleCurrentChange"     current-change	currentPage 改变时会触发	当前页
             当前页，数据总条数，每一页展示的条数，连续页码数
@@ -51,11 +51,15 @@
         </el-pagination>
 
       </div>
+      <SpuForm v-show="scene==1" />
+      <SkuForm v-show="scene==2" />
     </el-card>
   </div>
 </template>
 
 <script>
+import SpuForm from '@/views/product/Spu/SpuForm'
+import SkuForm from '@/views/product/Spu/SkuForm'
 export default {
   name: "Spu",
   data() {
@@ -72,9 +76,12 @@ export default {
       // 一共有多少条数据
       total:0,
       // 存储spu数据的列表
-      records:[]
+      records:[],
+      // 控制spu的三个列表进行切换
+      scene:0
     };
   },
+  components:{SpuForm,SkuForm},
   methods: {
     // 自定义事件的回调(三级联动的自定义事件)
     getCategoryId({ categoryId, level }) {
@@ -114,6 +121,15 @@ export default {
       this.limit = limit
       // 需重新更新列表
       this.getSpuList()
+    },
+    // 添加Spu
+    addSpu (){
+      this.scene = 1
+    },
+    // 修改Spu
+    updateSpu (row){
+      // row 为当前的spu数据
+      this.scene = 1
     }
   },
 };
