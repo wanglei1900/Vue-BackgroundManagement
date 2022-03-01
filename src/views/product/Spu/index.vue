@@ -51,7 +51,7 @@
         </el-pagination>
 
       </div>
-      <SpuForm v-show="scene==1" />
+      <SpuForm v-show="scene==1" @changeScene='changeScene'  ref="spu" />
       <SkuForm v-show="scene==2" />
     </el-card>
   </div>
@@ -130,6 +130,13 @@ export default {
     updateSpu (row){
       // row 为当前的spu数据
       this.scene = 1
+      // 点击修改spu按钮时，获取子组件初始化spuform
+      this.$refs.spu.initSpuForm()
+    },
+    // 自定义事件，接收子组件取消按钮通知，切换场景
+    changeScene (scene){
+      // 切换场景为0，展示Spu界面
+      this.scene = scene
     }
   },
 };

@@ -49,7 +49,7 @@
 
         <el-form-item>
             <el-button type="primary">保存</el-button>
-            <el-button type="normal">取消</el-button>
+            <el-button type="normal" @click="$emit('changeScene', 0)">取消</el-button>
         </el-form-item>
     </el-form>
   </div>
@@ -65,15 +65,22 @@ export default {
     };
   },
   methods: {
-    //   图片上传的两个回调
+      // 图片上传的两个回调
       handleRemove(file, fileList) {
         console.log(file, fileList);
       },
       handlePictureCardPreview(file) {
         this.dialogImageUrl = file.url;
         this.dialogVisible = true;
+      },
+      // 初始化spuForm
+      initSpuForm (){
+        console.log('发了四个请求');
       }
+      
   },
+  mounted (){
+  }
 };
 </script>
 
