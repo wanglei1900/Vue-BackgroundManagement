@@ -131,7 +131,7 @@ export default {
       // row 为当前的spu数据
       this.scene = 1
       // 点击修改spu按钮时，获取子组件初始化spuform
-      this.$refs.spu.initSpuForm()
+      this.$refs.spu.initSpuForm(row)
     },
     // 自定义事件，接收子组件取消按钮通知，切换场景
     changeScene (scene){

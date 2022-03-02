@@ -61,7 +61,16 @@ export default {
   data() {
     return {
         dialogImageUrl: '',
-        dialogVisible: false
+        dialogVisible: false,
+
+        // spuInfo spu信息
+        spuInfo:{},
+        // trademarkList 品牌列表信息
+        trademarkList:[],
+        // spuImageList spu图片列表信息
+        spuImageList:[],
+        // baseSaleAttrList   
+        baseSaleAttrList:[]
     };
   },
   methods: {
@@ -74,8 +83,31 @@ export default {
         this.dialogVisible = true;
       },
       // 初始化spuForm
-      initSpuForm (){
-        console.log('发了四个请求');
+      async initSpuForm (row){
+        // console.log(row);
+        // 点击修改时，通过id查询点击的某一个spu的信息
+        let result =  await this.$API.spu.reqGetSpuById(row.id)
+        if (result.code ==200) {
+          this.spuInfo = result.data
+        }
+        // 点击修改时，获取品牌列表下拉菜
+        let result1 = await this.$API.spu.reqGetTrademarkList()
+        if (result1.code == 200) {
+          this.trademarkList = result1.data
+        }
+        // 点击修改时，获取spu图片的列表
+        let result2 = await this.$API.spu.reqSpuImageList(row.id)
+        if (result2.code == 200) {
+          this.spuImageList = result2.data
+        }
+        // 点击修改时，获取平台中所有的销售属性（最多3个，颜色、版本、尺码）
+        let result3 = await this.$API.spu.reqBaseSaleAttrList()
+        if (result3.code ==200) {
+          this.baseSaleAttrList = result3.data
+        }
+
+
+
       }
       
   },
