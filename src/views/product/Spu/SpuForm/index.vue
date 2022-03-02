@@ -1,56 +1,81 @@
 <template>
   <div>
-    <el-form ref="form" :model="form" label-width="80px">
-        <el-form-item label="SPU名称">
-            <el-input v-model="model" placeholder="SPU名称"></el-input>
-        </el-form-item>
+    <el-form ref="form" :model="spuInfo" label-width="80px" >
+      <el-form-item label="SPU名称" >
+        <el-input v-model="spuInfo.spuName" placeholder="SPU名称"></el-input>
+      </el-form-item>
 
-        <el-form-item label="品牌">
-            <el-select v-model="model" placeholder="请选择品牌">
-                <el-option label="label" value="value"></el-option>
-            </el-select>
-        </el-form-item>
+      <el-form-item label="品牌">
+        <el-select v-model="spuInfo.tmId" placeholder="请选择品牌">
+          <el-option :label="tm.tmName" :value="tm.id" v-for="(tm,index) in trademarkList" :key="tm.id" ></el-option>
+        </el-select>
+      </el-form-item>
 
-        <el-form-item label="品牌">
-            <!-- type="textarea" 文本输入框 rows="40px" 文本框的初始高度  -->
-            <el-input type="textarea" rows="8px" placeholder="SPU描述"></el-input>
-        </el-form-item>
+      <el-form-item label="SPU描述">
+        <!-- type="textarea" 文本输入框 rows="40px" 文本框的初始高度  -->
+        <el-input type="textarea" rows="8px" placeholder="请输入spu描述" v-model="spuInfo.description"></el-input>
+      </el-form-item>
 
-        <el-form-item label="SPU图片">
-            <el-upload
-                action="https://jsonplaceholder.typicode.com/posts/"
-                list-type="picture-card"
-                :on-preview="handlePictureCardPreview"
-                :on-remove="handleRemove">
-                <i class="el-icon-plus"></i>
-            </el-upload>
-            <el-dialog :visible.sync="dialogVisible">
-                <img width="100%" :src="dialogImageUrl" alt="">
-            </el-dialog>
-        </el-form-item>
+      <el-form-item label="SPU图片">
+        <!-- elementUI 的upload上传组件-->
+          <!-- 这里收集数据不能使用v-model，因为不是表单元素
+          list-type	文件列表的类型	string	text/picture/picture-card	text
+                action：设置图片上传的地址
+                :on-preview="handlePictureCardPreview"    图片预览的时候会触发
+                :on-remove="handleRemove"             删除图片的时候会触发
+                file-list	上传的文件列表, 例如: [{name: 'food.jpg', url: 'https://xxx.cdn.com/xxx.jpg'}]	array	—	[]
+                
+                :on-success="handleAvatarSuccess"     图片上传成功的回调
+                :before-upload="beforeAvatarUpload"   图片上传之前的回调
+          -->
+        <el-upload
+          action="/dev-api/admin/product/fileUpload"
+          list-type="picture-card"
+          :file-list="spuImageList"
+          :on-preview="handlePictureCardPreview"
+          :on-remove="handleRemove"
+        >
+          <i class="el-icon-plus"></i>
+        </el-upload>
+        <el-dialog :visible.sync="dialogVisible">
+          <img width="100%" :src="spuImageList.imgUrl" alt="" />
+        </el-dialog>
+      </el-form-item>
 
-        <el-form-item label="销售属性">
-            <el-select v-model="model" placeholder="还有三项未选择">
-                <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
-                </el-option>
-            </el-select>
-            <el-button type="primary" icon="el-icon-plus">添加销售属性</el-button>
-            <el-table :data="data" style="width: 100%" border>
-                <el-table-column align="center" type="index" label="序号" width="80px">
-                </el-table-column>
-                <el-table-column prop="prop" label="属性名" width="100px">
-                </el-table-column>
-                <el-table-column prop="prop" label="属性值名称列表" >
-                </el-table-column>
-                <el-table-column prop="prop" label="操作" width="150px">
-                </el-table-column>
-            </el-table>
-        </el-form-item>
+      <el-form-item label="销售属性">
+        <el-select v-model="model" placeholder="还有三项未选择">
+          <el-option
+            v-for="item in options"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          >
+          </el-option>
+        </el-select>
+        <el-button type="primary" icon="el-icon-plus">添加销售属性</el-button>
+        <el-table :data="data" style="width: 100%" border>
+          <el-table-column
+            align="center"
+            type="index"
+            label="序号"
+            width="80px"
+          >
+          </el-table-column>
+          <el-table-column prop="prop" label="属性名" width="100px">
+          </el-table-column>
+          <el-table-column prop="prop" label="属性值名称列表">
+          </el-table-column>
+          <el-table-column prop="prop" label="操作" width="150px">
+          </el-table-column>
+        </el-table>
+      </el-form-item>
 
-        <el-form-item>
-            <el-button type="primary">保存</el-button>
-            <el-button type="normal" @click="$emit('changeScene', 0)">取消</el-button>
-        </el-form-item>
+      <el-form-item>
+        <el-button type="primary">保存</el-button>
+        <el-button type="normal" @click="$emit('changeScene', 0)"
+          >取消</el-button
+        >
+      </el-form-item>
     </el-form>
   </div>
 </template>
@@ -60,62 +85,101 @@ export default {
   name: "SpuForm",
   data() {
     return {
-        dialogImageUrl: '',
-        dialogVisible: false,
+      dialogImageUrl: "",
+      dialogVisible: false,
 
-        // spuInfo spu信息
-        spuInfo:{},
-        // trademarkList 品牌列表信息
-        trademarkList:[],
-        // spuImageList spu图片列表信息
-        spuImageList:[],
-        // baseSaleAttrList   
-        baseSaleAttrList:[]
+      // spuInfo spu信息，spu初始化的时候是一个空对象，在修改spu 的时候，会向服务器发请求，返回spu信息，在修改的时候可以利用服务器返回的这个对象收集最新的数据提交给服务器
+      // 添加spu，如果是添加spu 的时候并没有向服务器添加请求，数据收集到哪里【spu】，收集数据的时候有哪些字段，看文档
+      spuInfo: {
+        // 三级分类的id
+        category3Id: 0,
+        // 平台的id
+        tmId: 0,
+        // 描述
+        description: "",
+        // spu的名称
+        spuName:'',
+        // 收集spu图片的信息
+        spuImageList: [
+          {
+            id: 0,
+            imgName: "",
+            imgUrl: "",
+            spuId: 0,
+          },
+        ],
+        // 平台属性的属性值
+        spuSaleAttrList: [
+          {
+            baseSaleAttrId: 0,
+            id: 0,
+            saleAttrName: "string",
+            spuId: 0,
+            spuSaleAttrValueList: [
+              {
+                baseSaleAttrId: 0,
+                id: 0,
+                isChecked: "string",
+                saleAttrName: "string",
+                saleAttrValueName: "string",
+                spuId: 0,
+              },
+            ],
+          },
+        ],
+      },
+      // trademarkList 品牌列表信息
+      trademarkList: [],
+      // spuImageList spu图片列表信息
+      spuImageList: [],
+      // baseSaleAttrList
+      baseSaleAttrList: [],
     };
   },
   methods: {
-      // 图片上传的两个回调
-      handleRemove(file, fileList) {
-        console.log(file, fileList);
-      },
-      handlePictureCardPreview(file) {
-        this.dialogImageUrl = file.url;
-        this.dialogVisible = true;
-      },
-      // 初始化spuForm
-      async initSpuForm (row){
-        // console.log(row);
-        // 点击修改时，通过id查询点击的某一个spu的信息
-        let result =  await this.$API.spu.reqGetSpuById(row.id)
-        if (result.code ==200) {
-          this.spuInfo = result.data
-        }
-        // 点击修改时，获取品牌列表下拉菜
-        let result1 = await this.$API.spu.reqGetTrademarkList()
-        if (result1.code == 200) {
-          this.trademarkList = result1.data
-        }
-        // 点击修改时，获取spu图片的列表
-        let result2 = await this.$API.spu.reqSpuImageList(row.id)
-        if (result2.code == 200) {
-          this.spuImageList = result2.data
-        }
-        // 点击修改时，获取平台中所有的销售属性（最多3个，颜色、版本、尺码）
-        let result3 = await this.$API.spu.reqBaseSaleAttrList()
-        if (result3.code ==200) {
-          this.baseSaleAttrList = result3.data
-        }
-
-
-
+    // 图片上传的两个回调
+    handleRemove(file, fileList) {
+      console.log(file, fileList);
+    },
+    handlePictureCardPreview(file) {
+      this.dialogImageUrl = file.url;
+      this.dialogVisible = true;
+    },
+    // 初始化spuForm
+    async initSpuForm(row) {
+      // console.log(row);
+      // 点击修改时，通过id查询点击的某一个spu的信息
+      let result = await this.$API.spu.reqGetSpuById(row.id);
+      if (result.code == 200) {
+        this.spuInfo = result.data;
       }
-      
+      // 点击修改时，获取品牌列表下拉菜
+      let result1 = await this.$API.spu.reqGetTrademarkList();
+      if (result1.code == 200) {
+        this.trademarkList = result1.data;
+      }
+      // 点击修改时，获取spu图片的列表
+      let result2 = await this.$API.spu.reqSpuImageList(row.id);
+      if (result2.code == 200) {
+        // 由于照片墙显示图片的数据是数组，数组里面的元素要有name和url字段
+        // 需要把数据调整一下
+        let listArr = result2.data
+        listArr.forEach(element => {
+          element.name = element.imgName
+          element.url = element.imgUrl
+        });
+        this.spuImageList = listArr;
+      }
+      // 点击修改时，获取平台中所有的销售属性（最多3个，颜色、版本、尺码）
+      let result3 = await this.$API.spu.reqBaseSaleAttrList();
+      if (result3.code == 200) {
+        this.baseSaleAttrList = result3.data;
+      }
+    },
   },
-  mounted (){
-  }
+  mounted() {},
 };
 </script>
 
 <style>
-
 </style>

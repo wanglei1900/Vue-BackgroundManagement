@@ -34,6 +34,6 @@ export const reqBaseSaleAttrList = () => request({
     method:'GET'
 })
 
-
+// 添加spuForm数据的展示与收集  POST /admin/product/saveSpuInfo
 
 
