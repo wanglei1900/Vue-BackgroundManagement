@@ -43,29 +43,38 @@
       </el-form-item>
 
       <el-form-item label="销售属性">
-        <el-select v-model="model" placeholder="还有三项未选择">
-          <el-option
-            v-for="item in options"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value"
-          >
+        <el-select v-model="pendingAttrID" :placeholder="`还有${pendingSaleAttrList.length}项未选择`">
+          <el-option v-for="(item,index) in pendingSaleAttrList" :key="item.id" :label="item.name" :value="item.id">
           </el-option>
         </el-select>
-        <el-button type="primary" icon="el-icon-plus">添加销售属性</el-button>
-        <el-table :data="data" style="width: 100%" border>
-          <el-table-column
-            align="center"
-            type="index"
-            label="序号"
-            width="80px"
-          >
+        <el-button type="primary" icon="el-icon-plus" :disabled="!pendingAttrID">添加销售属性</el-button>
+        <!-- 展示的是当前spu属于自己的销售属性 -->
+        <el-table :data="spuInfo.spuSaleAttrList" style="width: 100%" border>
+          <el-table-column align="center" type="index" label="序号" width="80px">
           </el-table-column>
-          <el-table-column prop="prop" label="属性名" width="100px">
+          <el-table-column prop="saleAttrName" label="属性名" width="100px">
           </el-table-column>
-          <el-table-column prop="prop" label="属性值名称列表">
+          <el-table-column prop="spuSaleAttrList" label="属性值名称列表">
+            <template slot-scope="{row,$index}">
+              <!-- 饿了么组件动态编辑标签
+               @close="handleClose(tag)" -->
+              <el-tag :key="tag.id" v-for="tag in row.spuSaleAttrValueList" closable :disable-transitions="false">
+                {{tag.saleAttrValueName}}
+              </el-tag>
+              <!-- input 和 button互相切换
+              @keyup.enter.native="handleInputConfirm" @blur="handleInputConfirm"
+               -->
+              <el-input class="input-new-tag" v-if="row.inputVisible" v-model="row.inputValue" ref="saveTagInput" size="small" >
+              </el-input>
+              <!--  @click="showInput" -->
+              <el-button v-else class="button-new-tag" size="small">+ 添加</el-button>
+
+            </template>
           </el-table-column>
           <el-table-column prop="prop" label="操作" width="150px">
+            <template slot-scope="row,$index">
+              <el-button type="danger" icon="el-icon-delete" size="mini"></el-button>
+            </template>
           </el-table-column>
         </el-table>
       </el-form-item>
@@ -113,15 +122,15 @@ export default {
           {
             baseSaleAttrId: 0,
             id: 0,
-            saleAttrName: "string",
+            saleAttrName: "",
             spuId: 0,
             spuSaleAttrValueList: [
               {
                 baseSaleAttrId: 0,
                 id: 0,
-                isChecked: "string",
-                saleAttrName: "string",
-                saleAttrValueName: "string",
+                isChecked: "",
+                saleAttrName: "",
+                saleAttrValueName: "",
                 spuId: 0,
               },
             ],
@@ -132,8 +141,10 @@ export default {
       trademarkList: [],
       // spuImageList spu图片列表信息
       spuImageList: [],
-      // baseSaleAttrList
+      // baseSaleAttrList,寄出spu属性
       baseSaleAttrList: [],
+      // 此处为下拉框手机的未选择的销售属性的ID，需要发请求带给参数，并且以此id作为右边按钮disable的布尔值
+      pendingAttrID:""
     };
   },
   methods: {
@@ -176,10 +187,56 @@ export default {
         this.baseSaleAttrList = result3.data;
       }
     },
+    handleClose(tag) {
+      this.dynamicTags.splice(this.dynamicTags.indexOf(tag), 1);
+    },
+
+    showInput() {
+      this.inputVisible = true;
+      this.$nextTick(_ => {
+        this.$refs.saveTagInput.$refs.input.focus();
+      });
+    },
+
+    handleInputConfirm() {
+      let inputValue = this.inputValue;
+      if (inputValue) {
+        this.dynamicTags.push(inputValue);
+      }
+      this.inputVisible = false;
+      this.inputValue = '';
+    }
+  },
+  computed: {
+    // 计算出下拉菜单框的未被选择的属性（只有三个,尺寸、颜色、版本）baseSaleAttrList
+    // 当前spu拥有的属于直接的销售属性spuSaleAttrList   
+    pendingSaleAttrList (){
+     return this.baseSaleAttrList.filter((item)=>{
+      //  every数组会返回一个布尔值（真的假的）
+        return this.spuInfo.spuSaleAttrList.every((element)=>{
+          return  item.name !== element.saleAttrName
+        })
+      })
+    }
   },
   mounted() {},
 };
 </script>
 
 <style>
+  .el-tag + .el-tag {
+    margin-left: 10px;
+  }
+  .button-new-tag {
+    margin-left: 10px;
+    height: 32px;
+    line-height: 30px;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  .input-new-tag {
+    width: 90px;
+    margin-left: 10px;
+    vertical-align: bottom;
+  }
 </style>
