@@ -60,6 +60,7 @@
           <el-table-column prop="spuSaleAttrList" label="属性值名称列表">
             <template slot-scope="{row,$index}">
               <!-- 饿了么组件动态编辑标签
+              el-tag：用户展示已有属性值列表的数据的
                @close="handleClose(tag)" -->
               <el-tag :key="tag.id" v-for="tag in row.spuSaleAttrValueList" closable :disable-transitions="false">
                 {{tag.saleAttrValueName}}
@@ -67,10 +68,10 @@
               <!-- input 和 button互相切换
               @keyup.enter.native="handleInputConfirm" @blur="handleInputConfirm"
                -->
-              <el-input class="input-new-tag" v-if="row.inputVisible" v-model="row.inputValue" ref="saveTagInput" size="small" >
+              <el-input class="input-new-tag" v-if="row.inputVisible" v-model="row.inputValue" ref="saveTagInput" size="small" @blur="handleInputConfirm(row)" >
               </el-input>
-              <!--  @click="showInput" -->
-              <el-button v-else class="button-new-tag" size="small">+ 添加</el-button>
+              <!--  @click="showInput"  -->
+              <el-button v-else class="button-new-tag" size="small" @click="updateSaleAttrValue(row)">+ 添加</el-button>
 
             </template>
           </el-table-column>
@@ -215,10 +216,37 @@ export default {
       let newSaleAttr = {baseSaleAttrId, saleAttrName,spuSaleAttrValueList:[]}
       // 添加新的销售属性
       this.spuInfo.spuSaleAttrList.push(newSaleAttr)
+      // 清除已经添加的属性
+      this.pendingAttrIdAndName = ''
     },
+    // 为某一个属性对应的销售属性值的回调
+    updateSaleAttrValue (row){
+      console.log(row);
+      // 点击销售值属性当中的添加妞妞，需要有button变为input，通过当前销售属性inputVisible控制显示
+      // 挂载在销售属性身上的响应式数据inputValue，控制button与input切换
+      this.$set(row, 'inputVisible', true)
+      this.$set(row, 'inputValue', '')
+    },
+    // 添加属性值的elinput输入框失去焦点后的回调
+    handleInputConfirm (row){
+      // 解构出销售属性当 手机数据
+      const {baseSaleAttrId,inputValue} = row
+      // 首先。新增的销售值不能为空
+      if (inputValue.trim() =='') {
+        this.$message({type:'error',message:'输入不能为空'})
+        // 其次。新增销售属性值不能重复
+      }else if(row.spuSaleAttrValueList.some(element=> element.saleAttrValueName ==inputValue)){
+        this.$message({type:'error',message:'输入重复'})
+      }else{
+        // 验证完毕。新增的销售属性值
+        let newSaleAttrValue ={baseSaleAttrId,saleAttrValueName:inputValue}
+        row.spuSaleAttrValueList.push(newSaleAttrValue)
+        // 修改inputVisible为false，显示button
+        row.inputVisible = false
+      }
+    }
 
-
-    handleClose(tag) {
+    /* handleClose(tag) {
       this.dynamicTags.splice(this.dynamicTags.indexOf(tag), 1);
     },
     showInput() {
@@ -227,7 +255,6 @@ export default {
         this.$refs.saveTagInput.$refs.input.focus();
       });
     },
-
     handleInputConfirm() {
       let inputValue = this.inputValue;
       if (inputValue) {
@@ -235,7 +262,8 @@ export default {
       }
       this.inputVisible = false;
       this.inputValue = '';
-    }
+    } */
+
   },
   computed: {
     // 计算出下拉菜单框的未被选择的属性（只有三个,尺寸、颜色、版本）baseSaleAttrList
