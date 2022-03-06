@@ -31,9 +31,22 @@ export const reqSpuImageList = (spuId) => request({
 // 获取平台中所有的销售属性（最多3个，颜色、版本、尺码） GET /admin/product/baseSaleAttrList
 export const reqBaseSaleAttrList = () => request({
     url: '/admin/product/baseSaleAttrList',
-    method:'GET'
+    method: 'GET'
 })
 
-// 添加spuForm数据的展示与收集  POST /admin/product/saveSpuInfo
+// 添加spuForm数据接口  POST /admin/product/saveSpuInfo
+// 修改spuForm数据接口  POST /admin/product/updateSpuInfo
+// 修改或者添加spuForm数据,两个接口的参数基本一致，唯一区别是携带的参数id
+export const reqUpdateOrSaveSpuInfo = (spuInfo) => {
+    if (spuInfo.id) {
+        return request({ url: '/admin/product/updateSpuInfo', method: 'POST', data: spuInfo })
+    } else {
+        return request({ url: '/admin/product/saveSpuInfo', method: 'POST', data: spuInfo })
+    }
+}
 
-
+// 删除spu  DELETE /admin/product/deleteSpu/{spuId}
+export const reqDeleteSpu = (spuId) => request({
+    url: `/admin/product/deleteSpu/${spuId}`,
+    method: 'DELETE'
+})

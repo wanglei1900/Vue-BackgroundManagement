@@ -2,7 +2,7 @@
   <div>
     <el-card style="margin: 20px 0">
       <!-- 直接引用三级联动组件CategorySelect -->
-      <CategorySelect @getCategoryId="getCategoryId" :show="!show" />
+      <CategorySelect @getCategoryId="getCategoryId" :show="scene!==0" />
     </el-card>
     <!-- 展示spu列表  共三个模块 -->
     <el-card>
@@ -23,7 +23,14 @@
               <hint-button type="success" icon="el-icon-plus" size="mini" title="添加spu"></hint-button>
               <hint-button type="warning" icon="el-icon-edit" size="mini" title="修改spu" @click="updateSpu(row)"></hint-button>
               <hint-button type="info" icon="el-icon-info" size="mini" title="查看当前spu全部sku列表"></hint-button>
-              <hint-button type="danger" icon="el-icon-delete" size="mini" title="删除spu"></hint-button>
+              <!-- <hint-button type="danger" icon="el-icon-delete" size="mini" title="删除spu" @click="deleteSpu(row)"></hint-button> -->
+              <!-- 删除按钮改为气泡确认框 -->
+              <template>
+                <el-popconfirm confirm-button-text='好的' cancel-button-text='不用了' icon="el-icon-info" icon-color="red" title="确认删除吗？"  @onConfirm="deleteSpu(row)">
+                  <hint-button type="danger" icon="el-icon-delete" size="mini" title="删除spu" slot="reference">删除</hint-button>
+                </el-popconfirm>
+              </template>
+
             </template>
           </el-table-column>
         </el-table>
@@ -51,7 +58,7 @@
         </el-pagination>
 
       </div>
-      <SpuForm v-show="scene==1" @changeScene='changeScene'  ref="spu" />
+      <SpuForm v-show="scene==1" @changeScene='changeScene' ref="spu" />
       <SkuForm v-show="scene==2" />
     </el-card>
   </div>
@@ -67,8 +74,6 @@ export default {
       category1Id: "",
       category2Id: "",
       category3Id: "",
-      // 控制table表格的显示与隐藏，默认显示
-      show: true,
       // 分页器当前页的页码
       page:1,
       // 每一页展示多少条数据
@@ -125,6 +130,8 @@ export default {
     // 添加Spu
     addSpu (){
       this.scene = 1
+      // 通知子组件spuForm发请求---两个    点击添加按钮时并携带参数三级id
+      this.$refs.spu.saveSpuData(this.category3Id)
     },
     // 修改Spu
     updateSpu (row){
@@ -133,10 +140,31 @@ export default {
       // 点击修改spu按钮时，获取子组件初始化spuform
       this.$refs.spu.initSpuForm(row)
     },
-    // 自定义事件，接收子组件取消按钮通知，切换场景
-    changeScene (scene){
+    // 自定义事件，接收子组件通知，切换场景
+    changeScene ({scene,flag}){
       // 切换场景为0，展示Spu界面
-      this.scene = scene
+        this.scene = scene
+      // flag是为了区分保存按钮时是添加还是修改
+      if (flag == "修改") {
+        this.getSpuList(this.page)
+      }else{
+        this.getSpuList()
+      }
+    },
+    // 删除spu按钮的   
+    async deleteSpu (row){
+      // console.log(row);
+      // 发请求删除
+      let result = await this.$API.spu.reqDeleteSpu(row.id)
+      if (result.code ==200) {
+        // 将点击row那一行删除掉
+        this.records.splice(this.records.indexOf(row),1)
+        // 更新列表,注意判断删掉时展示的逻辑(三目表达式)
+        this.records.length>1?this.getSpuList(this.page):this.getSpuList(this.page-1)
+        this.$message({type:'success', message:'删除成功'})
+      }else{
+        this.$message({type:'error', message:'删除失败'})
+      }
     }
   },
 };

@@ -61,14 +61,15 @@
             <template slot-scope="{row,$index}">
               <!-- 饿了么组件动态编辑标签
               el-tag：用户展示已有属性值列表的数据的
-               @close="handleClose(tag)" -->
-              <el-tag :key="tag.id" v-for="tag in row.spuSaleAttrValueList" closable :disable-transitions="false">
+                -->
+              <el-tag :key="tag.id" v-for="(tag) in row.spuSaleAttrValueList" closable @close="handleClose(tag,row)" :disable-transitions="false">
                 {{tag.saleAttrValueName}}
               </el-tag>
               <!-- input 和 button互相切换
-              @keyup.enter.native="handleInputConfirm" @blur="handleInputConfirm"
+              个人认为以下两个确认input框的回调 使用其中一个就行了
+               @blur="handleInputConfirm"     @keyup.enter.native="handleInputConfirm(row)"
                -->
-              <el-input class="input-new-tag" v-if="row.inputVisible" v-model="row.inputValue" ref="saveTagInput" size="small" @blur="handleInputConfirm(row)" >
+              <el-input class="input-new-tag" v-if="row.inputVisible" v-model="row.inputValue" ref="saveTagInput" size="small" @blur="handleInputConfirm(row)">
               </el-input>
               <!--  @click="showInput"  -->
               <el-button v-else class="button-new-tag" size="small" @click="updateSaleAttrValue(row)">+ 添加</el-button>
@@ -77,16 +78,15 @@
           </el-table-column>
           <el-table-column prop="prop" label="操作" width="150px">
             <template slot-scope="row,$index">
-              <el-button type="danger" icon="el-icon-delete" size="mini"></el-button>
+              <el-button type="danger" icon="el-icon-delete" size="mini" @click="deleteSaleAttr(row)"></el-button>
             </template>
           </el-table-column>
         </el-table>
       </el-form-item>
 
       <el-form-item>
-        <el-button type="primary">保存</el-button>
-        <el-button type="normal" @click="$emit('changeScene', 0)"
-          >取消</el-button
+        <el-button type="primary" @click="updateOrSaveSpuInfo">保存</el-button>
+        <el-button type="normal" @click=cancel>取消</el-button
         >
       </el-form-item>
     </el-form>
@@ -107,19 +107,19 @@ export default {
         // 三级分类的id
         category3Id: 0,
         // 平台的id
-        tmId: 0,
+        tmId: '',
         // 描述
-        description: "",
+        description: "", 
         // spu的名称
         spuName:'',
         // 收集spu图片的信息
         spuImageList: [
-          // {
-          //   id: 0,
-          //   imgName: "",
-          //   imgUrl: "",
-          //   spuId: 0,
-          // },
+          /* {
+            id: 0,
+            imgName: "",
+            imgUrl: "",
+            spuId: 0,
+          }, */
         ],
         // 平台属性的属性值
         spuSaleAttrList: [
@@ -244,25 +244,63 @@ export default {
         // 修改inputVisible为false，显示button
         row.inputVisible = false
       }
-    }
-
-    /* handleClose(tag) {
-      this.dynamicTags.splice(this.dynamicTags.indexOf(tag), 1);
     },
-    showInput() {
-      this.inputVisible = true;
-      this.$nextTick(_ => {
-        this.$refs.saveTagInput.$refs.input.focus();
-      });
+    // 删除某一个点击的tag
+    handleClose(tag,row) {
+      // console.log(tag,row);
+      // tag为当前点击属性值列表的某一个属性值，
+      // 在当前属性的属性值列表中  通过indexof查询到 tag所在数组的索引  然后后splice切割数组
+      row.spuSaleAttrValueList.splice(row.spuSaleAttrValueList.indexOf(tag), 1);
     },
-    handleInputConfirm() {
-      let inputValue = this.inputValue;
-      if (inputValue) {
-        this.dynamicTags.push(inputValue);
+    // 删除某一行整个 的 属性
+    deleteSaleAttr (row){
+      // console.log(row);
+      this.spuInfo.spuSaleAttrList.splice(row.$index,1)
+    },
+    // 点击spu按钮的时候，发请求的函数
+    async saveSpuData (category3Id){
+      // 点击添加按钮的时候，收集三级分类的id
+      this.spuInfo.category3Id = category3Id
+      // 点击添加时，获取品牌列表下拉菜
+      let result1 = await this.$API.spu.reqGetTrademarkList();
+      if (result1.code == 200) {
+        this.trademarkList = result1.data;
       }
-      this.inputVisible = false;
-      this.inputValue = '';
-    } */
+      // 点击添加时，获取平台中所有的销售属性（最多3个，颜色、版本、尺码）
+      let result3 = await this.$API.spu.reqBaseSaleAttrList();
+      if (result3.code == 200) {
+        this.baseSaleAttrList = result3.data;
+      }
+    },
+    // 确认按钮修改或者添加某一个
+    async updateOrSaveSpuInfo (){
+      // 整理参数spuInfo.spuImageList 数组里的每一个项必须有imgName,imgUrl
+      this.spuInfo.spuImageList = this.spuImageList.map((element)=>{
+        return {imgName:element.name,
+                imgUrl:element.id&&element.url || element.response.data}
+      })
+      // 发请求
+      let result = await this.$API.spu.reqUpdateOrSaveSpuInfo(this.spuInfo)
+      if (result.code ==200) {
+        // 通知父组件spu更换场景，并且需要在场景0 的时候更新spu数据
+        this.$message({type:'success', message:'保存成功'})
+        this.$emit('changeScene', {scene:0, flag:this.spuInfo.id?'修改':'添加'})
+      }
+      // 清除数据
+      Object.assign(this._data, this.$options.data())
+    
+    },
+
+    // 取消按钮
+    cancel (){
+      // 点击取消按钮的时候，通知父组件切换场景为0
+      this.$emit('changeScene', {scene:0, flag:''})
+      // 需要清除数据,注意这种写法
+      // Object.assign()  ES6中新增的方法可以合并对象
+      // 组件实例的this._data，可以操作data当中响应式数据
+      // this.$options可以获取配置对象，配置对象的data函数执行，返回的响应式数据为空的
+      Object.assign(this._data, this.$options.data())
+    }
 
   },
   computed: {
@@ -277,8 +315,7 @@ export default {
       })
     }
   },
-  mounted() {},
-};
+}
 </script>
 
 <style>
