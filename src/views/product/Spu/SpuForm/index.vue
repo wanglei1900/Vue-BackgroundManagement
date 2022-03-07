@@ -287,8 +287,7 @@ export default {
         this.$emit('changeScene', {scene:0, flag:this.spuInfo.id?'修改':'添加'})
       }
       // 清除数据
-      Object.assign(this._data, this.$options.data())
-    
+      Object.assign(this._data, this.$options.data.call(this))
     },
 
     // 取消按钮
@@ -299,7 +298,7 @@ export default {
       // Object.assign()  ES6中新增的方法可以合并对象
       // 组件实例的this._data，可以操作data当中响应式数据
       // this.$options可以获取配置对象，配置对象的data函数执行，返回的响应式数据为空的
-      Object.assign(this._data, this.$options.data())
+      Object.assign(this._data, this.$options.data.call(this))
     }
 
   },

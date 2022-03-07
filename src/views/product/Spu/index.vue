@@ -20,7 +20,7 @@
           <el-table-column prop="prop" label="操作" width="250px">
             <template slot-scope="{row,$index}">
               <!-- 用封装的hintButton 替换 -->
-              <hint-button type="success" icon="el-icon-plus" size="mini" title="添加spu"></hint-button>
+              <hint-button type="success" icon="el-icon-plus" size="mini" title="添加spu" @click="addSku(row)"></hint-button>
               <hint-button type="warning" icon="el-icon-edit" size="mini" title="修改spu" @click="updateSpu(row)"></hint-button>
               <hint-button type="info" icon="el-icon-info" size="mini" title="查看当前spu全部sku列表"></hint-button>
               <!-- <hint-button type="danger" icon="el-icon-delete" size="mini" title="删除spu" @click="deleteSpu(row)"></hint-button> -->
@@ -59,7 +59,7 @@
 
       </div>
       <SpuForm v-show="scene==1" @changeScene='changeScene' ref="spu" />
-      <SkuForm v-show="scene==2" />
+      <SkuForm v-show="scene==2" ref="sku" />
     </el-card>
   </div>
 </template>
@@ -165,6 +165,14 @@ export default {
       }else{
         this.$message({type:'error', message:'删除失败'})
       }
+    },
+    // 添加sku方法的回调
+    addSku (row){
+      // 切换场景
+      this.scene = 2
+      console.log(row);
+      // 父组件调用子组件的方法，让子组件发三个请求
+      this.$refs.sku.saveSpuData(this.category1Id,this.category2Id,this.category3Id, row.id)
     }
   },
 };
