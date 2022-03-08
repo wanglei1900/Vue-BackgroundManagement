@@ -86,8 +86,7 @@
 
       <el-form-item>
         <el-button type="primary" @click="updateOrSaveSpuInfo">保存</el-button>
-        <el-button type="normal" @click=cancel>取消</el-button
-        >
+        <el-button type="normal" @click="cancelSpuForm">取消</el-button>
       </el-form-item>
     </el-form>
   </div>
@@ -291,7 +290,7 @@ export default {
     },
 
     // 取消按钮
-    cancel (){
+    cancelSpuForm (){
       // 点击取消按钮的时候，通知父组件切换场景为0
       this.$emit('changeScene', {scene:0, flag:''})
       // 需要清除数据,注意这种写法

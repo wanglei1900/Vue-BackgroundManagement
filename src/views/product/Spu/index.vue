@@ -172,7 +172,7 @@ export default {
       this.scene = 2
       console.log(row);
       // 父组件调用子组件的方法，让子组件发三个请求
-      this.$refs.sku.saveSpuData(this.category1Id,this.category2Id,this.category3Id, row.id)
+      this.$refs.sku.saveSpuData(this.category1Id,this.category2Id,this.category3Id, row)
     }
   },
 };
