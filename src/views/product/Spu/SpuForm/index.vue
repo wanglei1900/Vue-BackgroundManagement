@@ -283,7 +283,7 @@ export default {
       if (result.code ==200) {
         // 通知父组件spu更换场景，并且需要在场景0 的时候更新spu数据
         this.$message({type:'success', message:'保存成功'})
-        this.$emit('changeScene', {scene:0, flag:this.spuInfo.id?'修改':'添加'})
+        this.$emit('change-scene', {scene:0, flag:this.spuInfo.id?'修改':'添加'})
       }
       // 清除数据
       Object.assign(this._data, this.$options.data.call(this))
@@ -292,7 +292,7 @@ export default {
     // 取消按钮
     cancelSpuForm (){
       // 点击取消按钮的时候，通知父组件切换场景为0
-      this.$emit('changeScene', {scene:0, flag:''})
+      this.$emit('change-scene', {scene:0, flag:''})
       // 需要清除数据,注意这种写法
       // Object.assign()  ES6中新增的方法可以合并对象
       // 组件实例的this._data，可以操作data当中响应式数据

@@ -32,7 +32,7 @@
       </el-form-item>
 
       <el-form-item label="销售属性">
-        <el-form :inline="true" ref="form" :model="form" label-width="80px">
+        <el-form :inline="true" label-width="80px">
           <el-form-item :label="saleAttr.saleAttrName" v-for="(saleAttr,index) in spuSaleAttrList" :key="saleAttr.id">
             <el-select placeholder="请选择" v-model="saleAttr.saleAttrIdAndSaleAttrValueId">
               <el-option :label="saleAttrValue.saleAttrValueName" :value="`${saleAttr.id}:${saleAttrValue.id}`" v-for="(saleAttrValue,index) in saleAttr.spuSaleAttrValueList" :key="saleAttrValue.id"></el-option>
@@ -42,43 +42,46 @@
       </el-form-item>
 
       <el-form-item label="图片列表">
-        <el-table style="width: 100%" border>
-          <el-table-column
-            header-align="center"
-            align="center"
-            prop="prop"
-            type="selection"
-            width="80px"
-          >
+        <!-- 
+          表格 table
+          data表格组件需要展示的数据---数组类型   
+          border	是否带有纵向边框 
+
+          表格列 
+          table-column boolean
+          label	显示的标题	string
+          width	对应列的宽度	string
+          align	对齐方式	String	left/center/right	left
+          prop	对应列内容的字段名，也可以使用 property 属性	string
+
+          注意1：elementUI当中的table组件，展示的数据是以一列一列进行展示数据
+                复选框的回调函数
+          -->
+        <el-table style="width: 100%" border :data="spuImageList" @selection-change="handleSelectionChange">
+          <el-table-column header-align="center" align="center" prop="prop" type="selection" width="80px">
           </el-table-column>
-          <el-table-column
-            header-align="center"
-            align="center"
-            prop="prop"
-            label="图片"
-          >
+          <el-table-column header-align="center" align="center" prop="spuImageList" label="图片">
+              <template slot-scope="{row,$index}">
+                <img :src="row.imgUrl" style="width:100px;height:100px">
+              </template>
           </el-table-column>
-          <el-table-column
-            header-align="center"
-            align="center"
-            prop="prop"
-            label="名称"
-          >
+          <el-table-column eader-align="center" align="center" prop="prop" label="名称">
+              <template slot-scope="{row,$index}">
+                {{row.imgName}}
+              </template>
           </el-table-column>
-          <el-table-column
-            header-align="center"
-            align="center"
-            prop="prop"
-            label="操作"
-          >
-            <el-button type="primary">设为默认</el-button>
+          <el-table-column header-align="center" align="center" prop="prop" label="操作">
+             <template slot-scope="{row,$index}">
+                <el-button type="normal" v-if="row.isDefault==0" @click="changeDefault(row)">设为默认</el-button>
+                <el-button type="primary" v-else>默认</el-button>
+             </template>
           </el-table-column>
         </el-table>
       </el-form-item>
 
       <el-form-item>
         <el-button type="primary">确认</el-button>
-        <el-button @click="cancelSkuForm">取消</el-button>
+        <el-button type="normal" @click="cancelSkuForm">取消</el-button>
       </el-form-item>
     </el-form>
   </div>
@@ -142,6 +145,7 @@ export default {
           }, */
         ],
       },
+      imageList:[],
       spu:{
         spuName:''
       }
@@ -150,7 +154,6 @@ export default {
   methods: {
     //  接收父组件的通知，发情三个请求，获取skuform数据
     async saveSpuData(category1Id, category2Id, category3Id, spu) {
-      console.log(spu);
       // 收集父组件给与的数据
       this.skuInfo.category3Id = category3Id
       this.skuInfo.spuId = spu.id
@@ -160,7 +163,9 @@ export default {
       // 获取spu图片列表信息
       let result = await this.$API.sku.reqSpuImageList(spu.id);
       if (result.code == 200) {
-        this.spuImageList = result.data;
+        let list = result.data
+        list.forEach(element => element.isDefault=0);
+        this.spuImageList = list;
       }
       // 获取销售属性列表
       let result1 = await this.$API.sku.reqSpuSaleAttrList(spu.id);
@@ -179,7 +184,18 @@ export default {
     },
     // 点击取消按钮，通知父组件切换为0 的场景
     cancelSkuForm (){
-      this.$emit('changeScene', {scene:0, flag:''})
+      this.$emit('change-scene', {scene:0, flag:''})
+      Object.assign(this._data, this.$options.data.call(this))
+    },
+    // 当选择项发生变化时会触发该事件
+    handleSelectionChange (val){
+      this.imageList = val
+    },
+    // 切换默认按钮
+    changeDefault(row){
+      console.log(row);
+      this.spuImageList.forEach(element => element.isDefault=0)
+      row.isDefault = 1
     }
   },
 };

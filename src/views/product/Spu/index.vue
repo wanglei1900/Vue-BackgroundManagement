@@ -58,8 +58,8 @@
         </el-pagination>
 
       </div>
-      <SpuForm v-show="scene==1" @changeScene='changeScene' ref="spu" />
-      <SkuForm v-show="scene==2" ref="sku" />
+      <SpuForm v-show="scene==1" @change-scene='changeScene' ref="spu" />
+      <SkuForm v-show="scene==2" @change-scene='changeScene' ref="sku" />
     </el-card>
   </div>
 </template>
@@ -140,8 +140,8 @@ export default {
       // 点击修改spu按钮时，获取子组件初始化spuform
       this.$refs.spu.initSpuForm(row)
     },
-    // 自定义事件，接收子组件通知，切换场景
-    changeScene ({scene,flag}){
+    // change-scened自定义事件的回调changeScene，接收子组件通知，切换场景
+    changeScene({scene,flag}){
       // 切换场景为0，展示Spu界面
         this.scene = scene
       // flag是为了区分保存按钮时是添加还是修改
@@ -170,7 +170,6 @@ export default {
     addSku (row){
       // 切换场景
       this.scene = 2
-      console.log(row);
       // 父组件调用子组件的方法，让子组件发三个请求
       this.$refs.sku.saveSpuData(this.category1Id,this.category2Id,this.category3Id, row)
     }
