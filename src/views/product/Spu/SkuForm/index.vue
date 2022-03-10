@@ -80,7 +80,7 @@
       </el-form-item>
 
       <el-form-item>
-        <el-button type="primary">确认</el-button>
+        <el-button type="primary" @click="saveSkuInfo">确认</el-button>
         <el-button type="normal" @click="cancelSkuForm">取消</el-button>
       </el-form-item>
     </el-form>
@@ -88,6 +88,7 @@
 </template>
 
 <script>
+import { reqUpdateOrSaveSpuInfo } from '@/api/product/spu';
 export default {
   name: "SkuForm",
   data() {
@@ -132,7 +133,7 @@ export default {
             valueId: '',
           }, */
         ],
-        // 收集销售数字列表
+        // 收集销售属性列表
         skuSaleAttrValueList: [
           /* {
             id: 0,
@@ -161,19 +162,19 @@ export default {
       this.spu.spuName = spu.spuName
       // 这里可以试下Promise.all
       // 获取spu图片列表信息
-      let result = await this.$API.sku.reqSpuImageList(spu.id);
+      let result = await this.$API.spu.reqSpuImageList(spu.id);
       if (result.code == 200) {
         let list = result.data
         list.forEach(element => element.isDefault=0);
         this.spuImageList = list;
       }
       // 获取销售属性列表
-      let result1 = await this.$API.sku.reqSpuSaleAttrList(spu.id);
+      let result1 = await this.$API.spu.reqSpuSaleAttrList(spu.id);
       if (result1.code == 200) {
         this.spuSaleAttrList = result1.data;
       }
       // 获取attrInfoList
-      let result2 = await this.$API.sku.reqAttrInfoList(
+      let result2 = await this.$API.spu.reqAttrInfoList(
         category1Id,
         category2Id,
         category3Id
@@ -196,6 +197,40 @@ export default {
       console.log(row);
       this.spuImageList.forEach(element => element.isDefault=0)
       row.isDefault = 1
+    },
+    // skuform表格里的保存按钮 skuInfo
+    async saveSkuInfo (){
+      // 整理参数
+      // 平台属性参数整理   也可以用reduce方法
+      this.attrInfoList.forEach((element)=>{
+        const [attrId,valueId] = element.attrIdAndAttrValueId.split(':')
+        this.skuInfo.skuAttrValueList.push({attrId,valueId})
+      })
+
+      // 销售属性列表
+      // this.skuInfo.skuSaleAttrValueList
+      this.spuSaleAttrList.forEach((element)=>{
+        const [saleAttrId, saleAttrValueId] = element.saleAttrIdAndSaleAttrValueId.split(':')
+        this.skuInfo.skuSaleAttrValueList.push({saleAttrId, saleAttrValueId})
+      })
+      // 拿到默认图片
+      this.skuInfo.skuDefaultImg = this.spuImageList.find(element=>element.isDefault ==1).imgUrl
+      // 整理选中的图片列表,用map整理并映射出一个新数组
+      this.skuInfo.skuImageList = this.imageList.map((element)=>{
+        return {
+          imgName:element.imgName,
+          imgUrl:element.imgUrl,
+          isDefault:element.isDefault,
+          spuImgId:element.id
+        }
+      })
+      // 发起请求
+      let result = await this.$API.spu.reqSaveSkuInfo(this.skuInfo)
+      if (result.code ==200) {
+        this.$message({type:'success',message:'修改sku信息成功'})
+        // 跳转spu页面
+        this.$emit('change-scene', {scene:0, flag:'修改'})
+      }
     }
   },
 };
