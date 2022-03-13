@@ -71,54 +71,14 @@ export const reqAttrInfoList = (category1Id, category2Id, category3Id) => reques
 })
 
 // 添加SKU的保存按钮 POST /admin/product/saveSkuInfo
-export const reqSaveSkuInfo= (skuInfo) => request({
-    url:'/admin/product/saveSkuInfo',
-    method:'POST',
-    data:skuInfo   
+export const reqSaveSkuInfo = (skuInfo) => request({
+    url: '/admin/product/saveSkuInfo',
+    method: 'POST',
+    data: skuInfo
 })
 
-/* {
-    "category3Id": 0,
-    "createTime": "2022-03-10T14:13:38.165Z",
-    "id": 0,
-    "isSale": 0,
-    "price": 0,
-    "skuAttrValueList": [
-      {
-        "attrId": 0,
-        "attrName": "string",
-        "id": 0,
-        "skuId": 0,
-        "valueId": 0,
-        "valueName": "string"
-      }
-    ],
-    "skuDefaultImg": "string",
-    "skuDesc": "string",
-    "skuImageList": [
-      {
-        "id": 0,
-        "imgName": "string",
-        "imgUrl": "string",
-        "isDefault": "string",
-        "skuId": 0,
-        "spuImgId": 0
-      }
-    ],
-    "skuName": "string",
-    "skuSaleAttrValueList": [
-      {
-        "id": 0,
-        "saleAttrId": 0,
-        "saleAttrName": "string",
-        "saleAttrValueId": 0,
-        "saleAttrValueName": "string",
-        "skuId": 0,
-        "spuId": 0
-      }
-    ],
-    "spuId": 0,
-    "tmId": 0,
-    "weight": "string"
-  } */
-
+//  获取sku列表数据的接口 GET /admin/product/findBySpuId/{spuId}
+export const reqFindBySpuId = (spuId) => request({
+    url:`/admin/product/findBySpuId/${spuId}`,
+    method:'GET'
+})

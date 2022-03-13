@@ -22,7 +22,7 @@
               <!-- 用封装的hintButton 替换 -->
               <hint-button type="success" icon="el-icon-plus" size="mini" title="添加spu" @click="addSku(row)"></hint-button>
               <hint-button type="warning" icon="el-icon-edit" size="mini" title="修改spu" @click="updateSpu(row)"></hint-button>
-              <hint-button type="info" icon="el-icon-info" size="mini" title="查看当前spu全部sku列表"></hint-button>
+              <hint-button type="info" icon="el-icon-info" size="mini" title="查看当前spu全部sku列表" @click="checkSkuList(row)"></hint-button>
               <!-- <hint-button type="danger" icon="el-icon-delete" size="mini" title="删除spu" @click="deleteSpu(row)"></hint-button> -->
               <!-- 删除按钮改为气泡确认框 -->
               <template>
@@ -61,9 +61,22 @@
       <SpuForm v-show="scene==1" @change-scene='changeScene' ref="spu" />
       <SkuForm v-show="scene==2" @change-scene='changeScene' ref="sku" />
     </el-card>
+    <!-- Table -->
+    <el-dialog :title="`${spuName}的SKU列表`" :visible.sync="dialogTableVisible" @close="closeSkuList">
+      <el-table :data="skuList" border v-loading="loading">
+        <el-table-column prop="skuName" label="名称" width="150"></el-table-column>
+        <el-table-column prop="price" label="价格" width="150"></el-table-column>
+        <el-table-column prop="weight" label="重量" width="50"></el-table-column>
+        <el-table-column prop="address" label="默认图片" >
+          <template slot-scope="{row,$index}">
+            <img :src="row.skuDefaultImg" style="width:150px; height:150px;">
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-dialog>
+
   </div>
 </template>
-
 <script>
 import SpuForm from '@/views/product/Spu/SpuForm'
 import SkuForm from '@/views/product/Spu/SkuForm'
@@ -83,7 +96,15 @@ export default {
       // 存储spu数据的列表
       records:[],
       // 控制spu的三个列表进行切换
-      scene:0
+      scene:0,
+      // 控制查看spu表格的显示与隐藏
+      dialogTableVisible:false,
+      // 查看SPU列表的标题
+      spuName:'',
+      // 用来展示SKU列表的数据
+      skuList:[],
+      // loading标记符
+      loading:true
     };
   },
   components:{SpuForm,SkuForm},
@@ -172,8 +193,29 @@ export default {
       this.scene = 2
       // 父组件调用子组件的方法，让子组件发三个请求
       this.$refs.sku.saveSpuData(this.category1Id,this.category2Id,this.category3Id, row)
+    },
+    // 点击查看SKU列表
+    async checkSkuList (row){
+      // 控制查看sku面板
+      this.dialogTableVisible = true
+      this.spuName = row.spuName
+
+      // 发请求捞取sku列表的数据
+      let result = await this.$API.spu.reqFindBySpuId(row.id)
+      if (result.code ==200) {
+        this.skuList = result.data
+        // 数据捞取到后，loading消失
+        this.loading = false
+      }
+    },
+    // 关闭SKU列表
+    closeSkuList (){
+      // skulist置空，放置再次打开时重影
+      this.skuList = []
+      // loading标志符打开
+      this.loading = true
     }
-  },
+  }
 };
 </script>
 
