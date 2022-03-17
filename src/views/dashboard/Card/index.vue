@@ -26,6 +26,7 @@
         <el-col :span="6">
             <el-card>
                 <Detail title="访问量" header="88460">
+                    <!-- 折线图 -->
                     <template v-slot:body>
                         <lineChart></lineChart>
                     </template>
@@ -41,8 +42,9 @@
             <!-- 第二个card -->
             <el-card>
                 <Detail title="支付笔数" header="88460">
+                  <!-- 柱状图 -->
                     <template v-slot:body>
-                        柱形图
+                        <barChart></barChart>
                     </template>
                     <template v-slot:footer>
                         <span>转化率  65%</span>
@@ -56,7 +58,7 @@
             <el-card>
                 <Detail title="运营活动效果" header="78%">
                     <template v-slot:body>
-
+                      <progressChart></progressChart>
                     </template>
                     <template v-slot:footer>
                         <span>
@@ -79,10 +81,12 @@
 <script>
 import Detail from "@/views/dashboard/Card/Detail";
 import lineChart from '@/views/dashboard/Card/lineChart'
+import barChart from '@/views/dashboard/Card/barChart'
+import progressChart from '@/views/dashboard/Card/progressChart'
 
 export default {
   name: "Card",
-  components: { Detail,lineChart },
+  components: { Detail,lineChart,barChart,progressChart },
 };
 </script>
 

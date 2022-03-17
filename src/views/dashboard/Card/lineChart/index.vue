@@ -20,7 +20,7 @@ export default {
       series: {
         type: "line",
         smooth: true,
-        data: [15, 25, 6, 45, 30, 45, 88, 65, 14],
+        data: [45, 55, 6, 45, 30, 45, 88, 65, 14],
         // 拐点样式设置
         itemStyle: {
           opacity: 0,
@@ -39,11 +39,11 @@ export default {
             colorStops: [
               {
                 offset: 0,
-                color: "#9b59b6", // 0% 处的颜色
+                color: "#a29bfe", // 0% 处的颜色
               },
               {
                 offset: 1,
-                color: "#bdc3c7", // 100% 处的颜色
+                color: "#fff", // 100% 处的颜色
               },
             ],
             global: false, // 缺省为 false
