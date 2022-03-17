@@ -3,21 +3,25 @@
     <el-card class="box-card">
       <!-- 头部 -->
       <div slot="header" class="clearfix">
-        <!-- 标签页事件 v-model="activeName" @tab-click="handleClick" -->
         <!-- 头部左侧 -->
-        <el-tabs>
-          <el-tab-pane label="销售额" name="first">销售额表格</el-tab-pane>
-          <el-tab-pane label="访问量" name="second">访问量表格</el-tab-pane>
+        <el-tabs class="tab" v-model="activeName" @tab-click="handleClick" >
+          <el-tab-pane label="销售额" name="sale"></el-tab-pane>
+          <el-tab-pane label="访问量" name="visit"></el-tab-pane>
         </el-tabs>
         <!-- 头部右侧 -->
-        <div class="block">
-          <span class="demonstration">今日 本周 本年 本月</span>
+        <div class="right">
+          <span>今日</span>
+          <span>本周</span>
+          <span>本年</span>
+          <span>本月</span>
           <!-- v-model="value1" -->
           <el-date-picker
+            class="date-picker"
             type="daterange"
-            range-separator="至"
+            range-separator="-"
             start-placeholder="开始日期"
             end-placeholder="结束日期"
+            size="mini"
           >
           </el-date-picker>
         </div>
@@ -25,11 +29,11 @@
 
       <!-- 底部 -->
       <el-row :gutter="30">
-        <el-col :span="20" class="chart">
+        <el-col :span="18" class="chart">
           <!-- 左侧表格 -->
           <Chart></Chart>
         </el-col>
-        <el-col :span="4">
+        <el-col :span="6">
           <!-- 右侧排行榜 -->
           <Ranking></Ranking>
         </el-col>
@@ -46,6 +50,18 @@ import Ranking from "@/views/dashboard/Sale/Ranking";
 export default {
   name: "Sale",
   components: { Chart, Ranking },
+  data() {
+    return {
+      activeName:'sale'
+    }
+  },
+  methods: {
+    // tab标签点击事件
+    handleClick (){
+      // 通知子组件chart修改数据
+      this.$bus.$emit('clickEvent', this.activeName)
+    }
+  },
 };
 </script>
 
@@ -53,12 +69,26 @@ export default {
 .clearfix {
   display: flex;
   justify-content: space-between;
+  position: relative;
 }
 >>> .el-card__header {
   border-bottom: none;
 }
-.chart{
-    height: 300px;
-
+.chart {
+  height: 300px;
+}
+.tab{
+  width: 100%;
+}
+.right{
+  position: absolute;
+  right: 0;
+}
+.right span{
+  margin: 0 10px;
+}
+.date-picker{
+  width: 200px;
+  margin: 0 20px;
 }
 </style>

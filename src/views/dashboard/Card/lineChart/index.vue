@@ -20,7 +20,7 @@ export default {
       series: {
         type: "line",
         smooth: true,
-        data: [45, 55, 6, 45, 30, 45, 88, 65, 14],
+        data: [45, 55, 45,35,86, 45, 30, 45, 88, 65, 14],
         // 拐点样式设置
         itemStyle: {
           opacity: 0,

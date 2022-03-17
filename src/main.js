@@ -54,6 +54,8 @@ new Vue({
   beforeCreate() {
     // 给vue原型绑定$API方法
     Vue.prototype.$API = API
+    // 安装全局事件总线
+    Vue.prototype.$bus = this
   },
   render: h => h(App)
 })
