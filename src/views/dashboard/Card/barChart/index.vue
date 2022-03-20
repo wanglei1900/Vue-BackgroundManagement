@@ -17,11 +17,11 @@ export default {
       yAxis: {
         show: false,
       },
-      series: {
+      series: [{
         type:"bar",
         data:[45, 55, 26, 45, 30, 45, 88, 65,66,99,54],
         color:"cyan"
-      },
+      }],
       // 布局调试
       grid: {
         left: 0,

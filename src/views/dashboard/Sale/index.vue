@@ -4,24 +4,24 @@
       <!-- 头部 -->
       <div slot="header" class="clearfix">
         <!-- 头部左侧 -->
-        <el-tabs class="tab" v-model="activeName" @tab-click="handleClick" >
+        <el-tabs class="tab" v-model="activeName" @tab-click="handleClick">
           <el-tab-pane label="销售额" name="sale"></el-tab-pane>
           <el-tab-pane label="访问量" name="visit"></el-tab-pane>
         </el-tabs>
         <!-- 头部右侧 -->
         <div class="right">
-          <span>今日</span>
-          <span>本周</span>
-          <span>本年</span>
-          <span>本月</span>
-          <!-- v-model="value1" -->
+          <span @click="setDay">今日</span>
+          <span @click="setWeek">本周</span>
+          <span @click="setMonth">本月</span>
+          <span @click="setYear">本年</span>
           <el-date-picker
+            v-model="date"
             class="date-picker"
             type="daterange"
             range-separator="-"
             start-placeholder="开始日期"
             end-placeholder="结束日期"
-            size="mini"
+            value-format="yyyy-MM-dd"
           >
           </el-date-picker>
         </div>
@@ -44,6 +44,8 @@
 </template>
 
 <script>
+import dayjs from "dayjs";
+
 import Chart from "@/views/dashboard/Sale/Chart";
 import Ranking from "@/views/dashboard/Sale/Ranking";
 
@@ -52,15 +54,45 @@ export default {
   components: { Chart, Ranking },
   data() {
     return {
-      activeName:'sale'
-    }
+      activeName: "sale",
+      // 日历数据容器
+      date: [],
+    };
   },
   methods: {
     // tab标签点击事件
-    handleClick (){
+    handleClick() {
       // 通知子组件chart修改数据
-      this.$bus.$emit('clickEvent', this.activeName)
-    }
+      this.$bus.$emit("clickEvent", this.activeName);
+    },
+    // 设置今日日期
+    setDay() {
+      const day = dayjs().format("YYYY-MM-DD");
+      this.date = [day, day];
+    },
+    // 设置本周日期
+    setWeek() {
+      const monday = dayjs().day(1).format("YYYY-MM-DD");
+      const sunday = dayjs().day(7).format("YYYY-MM-DD");
+      this.date = [monday, sunday];
+    },
+    // 设置本月日期
+    setMonth() {
+      const monthStart = dayjs().startOf("month").format("YYYY-MM-DD");
+      const monthEnd = dayjs().endOf("month").format("YYYY-MM-DD");
+      this.date = [monthStart, monthEnd];
+    },
+    // 设置本年日期
+    setYear() {
+      const yearStart = dayjs().startOf("year").format("YYYY-MM-DD");
+      const yearEnd = dayjs().endOf("year").format("YYYY-MM-DD");
+      this.date = [yearStart, yearEnd];
+    },
+  },
+
+  // beforeDestroy钩子里销毁点击事件
+  beforeDestroy() {
+    this.$bus.$off("clickEvent");
   },
 };
 </script>
@@ -77,18 +109,18 @@ export default {
 .chart {
   height: 300px;
 }
-.tab{
+.tab {
   width: 100%;
 }
-.right{
+.right {
   position: absolute;
   right: 0;
 }
-.right span{
+.right span {
   margin: 0 10px;
 }
-.date-picker{
-  width: 200px;
+.date-picker {
+  width: 250px;
   margin: 0 20px;
 }
 </style>

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <span>门店销售额排名</span>
+    <span>门店{{ eventName }}排名</span>
     <ul>
       <li>
         <span class="rindex">1</span>
@@ -25,12 +25,12 @@
       <li>
         <span>5</span>
         <span>西贝筱面村</span>
-        <span class="amount">323,234</span>  
+        <span class="amount">323,234</span>
       </li>
       <li>
         <span>6</span>
         <span>汉堡王</span>
-        <span class="amount">323,234</span> 
+        <span class="amount">323,234</span>
       </li>
       <li>
         <span>7</span>
@@ -43,25 +43,38 @@
 
 <script>
 export default {
-    name:'Ranking',
-}
+  name: "Ranking",
+  data() {
+    return {
+      // 默认显示销售量
+      eventName: "销售量",
+    };
+  },
+  mounted() {
+    // 接收sale组件的通知，更改排行榜的标题名称
+    this.$bus.$on("clickEvent", (name) => {
+      // 若传过来的值sale则显示为销售量，否则为访问量
+      name==='sale'?this.eventName='销售量':this.eventName='访问量'
+    });
+  }
+};
 </script>
 
 <style scoped>
-ul{
+ul {
   list-style-type: none;
   width: 100%;
   height: 300px;
   padding: 0;
 }
-ul li{
+ul li {
   height: 8%;
   margin: 10px 0;
 }
-ul li span{
+ul li span {
   padding: 0 8px;
 }
-.rindex{
+.rindex {
   width: 15px;
   height: 15px;
   background: black;
@@ -69,7 +82,7 @@ ul li span{
   color: #fff;
   text-align: center;
 }
-.amount{
+.amount {
   float: right;
 }
 </style>
