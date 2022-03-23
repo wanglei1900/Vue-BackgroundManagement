@@ -6,9 +6,15 @@
 import * as echarts from "echarts";
 export default {
   name: "progressChart",
+  data() {
+    return {
+      progressChart:null,
+    }
+  },
+  props:['activityRate'],
   mounted() {
-    let progressChart = echarts.init(this.$refs.progressChart);
-    progressChart.setOption({
+    this.progressChart = echarts.init(this.$refs.progressChart);
+    this.progressChart.setOption({
       xAxis: {
         show: false,
         //  最小值与最大值
@@ -21,7 +27,7 @@ export default {
       },
       series: {
         type: "bar",
-        data: [78],
+        data: [this.activityRate],
         color: "cyan",
         // 柱状图的宽度
         barWidth: 15,
@@ -49,6 +55,15 @@ export default {
         tooltip:true
       },
     });
+  },
+  watch: {
+    activityRate(){
+      this.progressChart.setOption({
+        series: {
+          data:[this.activityRate]
+        }
+      })
+    }
   },
 };
 </script>

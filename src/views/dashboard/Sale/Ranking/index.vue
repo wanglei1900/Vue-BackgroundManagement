@@ -2,46 +2,18 @@
   <div>
     <span>门店{{ eventName }}排名</span>
     <ul>
-      <li>
-        <span class="rindex">1</span>
-        <span>肯德基</span>
-        <span class="amount">323,234</span>
-      </li>
-      <li>
-        <span class="rindex">2</span>
-        <span>麦当劳</span>
-        <span class="amount">323,234</span>
-      </li>
-      <li>
-        <span class="rindex">3</span>
-        <span>华莱士</span>
-        <span class="amount">323,234</span>
-      </li>
-      <li>
-        <span>4</span>
-        <span>海底捞</span>
-        <span class="amount">323,234</span>
-      </li>
-      <li>
-        <span>5</span>
-        <span>西贝筱面村</span>
-        <span class="amount">323,234</span>
-      </li>
-      <li>
-        <span>6</span>
-        <span>汉堡王</span>
-        <span class="amount">323,234</span>
-      </li>
-      <li>
-        <span>7</span>
-        <span>真功夫</span>
-        <span class="amount">323,234</span>
+      <li v-for="(user,index) in getUserRank" :key="getUserRank.no">
+        <span :class="{rindex: index== 0 || index==1 || index ==2}">{{user.no}}</span>
+        <span>{{user.name}}</span>
+        <span class="amount">{{user.money}}</span>
       </li>
     </ul>
   </div>
 </template>
 
 <script>
+import {mapGetters} from 'vuex'
+
 export default {
   name: "Ranking",
   data() {
@@ -56,7 +28,12 @@ export default {
       // 若传过来的值sale则显示为销售量，否则为访问量
       name==='sale'?this.eventName='销售量':this.eventName='访问量'
     });
-  }
+  },
+
+  computed: {
+    ...mapGetters('homeStore', ['getUserRank']),
+
+  },
 };
 </script>
 

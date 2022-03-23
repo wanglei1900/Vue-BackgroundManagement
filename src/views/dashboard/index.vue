@@ -13,11 +13,11 @@ import Observe from "@/views/dashboard/Observe";
 
 export default {
   name: "Dashboard",
-  components: { Card, Sale, Observe},
+  components: { Card, Sale, Observe },
   mounted() {
-    // 首页组件一挂载就发请求货物sale模块的柱状图数据 
-    this.$store.dispatch('homeStore/getSaleChartInfo') 
-  }
+    // 首页组件一挂载就发请求货物sale模块的柱状图数据
+    this.$store.dispatch("homeStore/getSaleChartInfo");
+  },
 };
 </script>
 

@@ -53,17 +53,16 @@ export default {
         containLabel: true,
       },
     });
-    // 展示默认数据
-    this.getChartInfo()
+    // 展示默认数据，不能在这里直接调用函数，因为异步操作接口数据可能还没返回图标就渲染完了
+    // this.getChartInfo()
     // 接收sale组件的通知，获取柱状图表格数据
     this.$bus.$on("clickEvent", this.getChartInfo);
   },
   methods: {
     getChartInfo(name ="sale") {
       name == "sale" ? (this.eventName = "销售量"): (this.eventName = "访问量");
-      // 重新更新表格chart 的配置,由于是异步操作，故需先判断数据是否已返回
-      if (this.saleChartInfo) {
-        this.chart.setOption({
+      // 注意这里的动态数据涉及到异步操作，所以还需要watch中检测saleChartInfo 加载。
+      this.chart.setOption({
         title: { text: this.eventName + "趋势" },
         xAxis: {
           data: name == "sale"? this.saleChartInfo.orderFullYearAxis: this.saleChartInfo.userFullYearAxis,
@@ -72,8 +71,14 @@ export default {
           data: name == "sale"? this.saleChartInfo.orderFullYear: this.saleChartInfo.userFullYear,
         },
       });
-      }
+
     },
+  },
+  watch: {
+    // 检测返回的数据saleChartInfo，首次加载才能渲染到数据
+    saleChartInfo(){
+      this.getChartInfo()
+    }
   },
   computed: {
     // 映射仓库数据

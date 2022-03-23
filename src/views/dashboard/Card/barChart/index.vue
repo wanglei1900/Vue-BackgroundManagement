@@ -6,9 +6,15 @@
 import * as echarts from "echarts";
 export default {
   name: "barChart",
+  data() {
+    return {
+      barChart:null,
+    }
+  },
+  props:['payTrend'],
   mounted() {
-    let barChart = echarts.init(this.$refs.barChart);
-    barChart.setOption({
+    this.barChart = echarts.init(this.$refs.barChart);
+    this.barChart.setOption({
       xAxis: {
         show: false,
         // 均分
@@ -19,7 +25,8 @@ export default {
       },
       series: [{
         type:"bar",
-        data:[45, 55, 26, 45, 30, 45, 88, 65,66,99,54],
+        // 动态引入父组件出传来的数据
+        data:[],
         color:"cyan"
       }],
       // 布局调试
@@ -31,6 +38,15 @@ export default {
       },
       tooltip:{}
     });
+  },
+  watch: {
+    payTrend(){
+      this.barChart.setOption({
+        series: {
+          data:this.payTrend
+        }
+      })
+    }
   },
 };
 </script>

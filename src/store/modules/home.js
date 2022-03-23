@@ -20,7 +20,11 @@ const mutations = {
       state.saleChartInfo = saleChartInfo
     }
 }
-const getters = {}
+const getters = {
+    getUserRank (state){
+        return state.saleChartInfo.userRank||[]
+    }
+}
 
 export default {
     namespaced: true,

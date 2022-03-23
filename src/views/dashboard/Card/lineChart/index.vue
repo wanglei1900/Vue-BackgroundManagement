@@ -6,9 +6,15 @@
 import * as echarts from "echarts";
 export default {
   name: "lineChart",
+  data() {
+    return {
+      lineChart:null,
+    }
+  },
+  props:['visitTrend'],
   mounted() {
-    let lineChart = echarts.init(this.$refs.lineChart);
-    lineChart.setOption({
+    this.lineChart = echarts.init(this.$refs.lineChart);
+    this.lineChart.setOption({
       xAxis: {
         show: false,
         type: "category",
@@ -20,7 +26,8 @@ export default {
       series: {
         type: "line",
         smooth: true,
-        data: [45, 55, 45,35,86, 45, 30, 45, 88, 65, 14],
+        // 动态引入父组件传来的访问数据量
+        data: [],
         // 拐点样式设置
         itemStyle: {
           opacity: 0,
@@ -59,6 +66,15 @@ export default {
       },
     });
   },
+  watch:{
+    visitTrend(){
+      this.lineChart.setOption({
+        series: {
+          data:this.visitTrend
+        }
+      })
+    }
+  }
 };
 </script>
 
