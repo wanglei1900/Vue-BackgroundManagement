@@ -35,7 +35,7 @@ import Layout from '@/layout'
 //需要把项目中的路由进行拆分
 
 //常量路由:就是不关用户是什么角色，都可以看见的路由
-//什么角色（超级管理员，普通员工）：登录、404、首页
+//不管什么角色（超级管理员，普通员工）：登录、404、首页
 export const constantRoutes = [
   {
     path: '/login',
@@ -47,7 +47,6 @@ export const constantRoutes = [
     component: () => import('@/views/404'),
     hidden: true
   },
-
   {
     path: '/',
     // 骨架不能少
@@ -61,6 +60,11 @@ export const constantRoutes = [
       meta: { title: '首页', icon: 'dashboard' }
     }]
   },
+
+]
+
+// 异步路由：不同的用户（角色），需要过滤筛选出的路由，称之为异步路由
+export const asyncRoutes = [
   {
     name: 'Acl',
     path: '/acl',
@@ -139,10 +143,30 @@ export const constantRoutes = [
       },
     ]
   },
-
-  // 404 page must be placed at the end !!!
-  { path: '*', redirect: '/404', hidden: true }
+  {
+    path: '/test',
+    component: Layout,
+    name: 'Test',
+    meta: { title: '测试管理', icon: 'el-icon-thumb' },
+    children: [
+      {
+        path: 'test1',
+        name: 'Test1',
+        component: () => import('@/views/Test/Test1'),
+        meta: { title: '测试管理1' }
+      },
+      {
+        path: 'test2',
+        name: 'Test2',
+        component: () => import('@/views/Test/Test2'),
+        meta: { title: '测试管理2' }
+      },
+    ]
+  }
 ]
+
+// 任意路由：路径出现错误的时候需要重定向404
+export const anyRoutes = { path: '*', redirect: '/404', hidden: true }
 
 const createRouter = () => new Router({
   // mode: 'history', // require service support
@@ -150,6 +174,7 @@ const createRouter = () => new Router({
   //因为注册的路由是‘死的’，‘活的’路由如果根据不同用户（角色）可以展示不同菜单
 
   routes: constantRoutes
+
 })
 
 const router = createRouter()
